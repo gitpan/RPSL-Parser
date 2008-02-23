@@ -1,4 +1,4 @@
-RPSL-Parser version 0.01
+RPSL-Parser 
 ========================
 
 RPSL Stands for Router Policy Specification Language, and it's described by
@@ -20,8 +20,7 @@ To install this module type the following:
 
 DEPENDENCIES
 
-The RPSL::Parser module requires Object::Accessor, YAML (optional), and
-XML::Compiler (optional).
+The RPSL::Parser module requires Object::Accessor.
 
 COPYRIGHT AND LICENCE
 

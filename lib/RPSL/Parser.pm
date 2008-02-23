@@ -3,25 +3,25 @@ use strict;
 use warnings;
 use base qw( Object::Accessor );
 
-our $VERSION = 0.01;
+
+our $VERSION = do { q$Revision: 19 $ =~ m{(\d+)}; return $1 / 100 };
 
 BEGIN { $Object::Accessor::FATAL = 1; }
 
-{
+sub new {
+    my $class = shift;
+
+    # I need to initialize some variables before use
     my %accessors = (
         comment  => {},
         object   => {},
         omit_key => [],
         order    => [],
     );
-
-    sub new {
-        my $class = shift;
-        my $self  = $class->SUPER::new;
-        $self->mk_accessors( qw(key text tokens type), keys %accessors );
-        $self->$_( $accessors{$_} ) for keys %accessors;
-        return $self;
-    }
+    my $self = $class->SUPER::new;
+    $self->mk_accessors( qw(key text tokens type), keys %accessors );
+    $self->$_( $accessors{$_} ) for keys %accessors;
+    return $self;
 }
 
 sub parse {
@@ -131,7 +131,8 @@ sub _build_parse_tree {
 
     # Stores the object primary key value
     my $primary_key = $self->object->{ $order[0] };
-    $primary_key = $primary_key->[0] if UNIVERSAL::isa( $primary_key, 'ARRAY' );
+    $primary_key = $primary_key->[0]
+        if UNIVERSAL::isa( $primary_key, 'ARRAY' );
     $primary_key =~ s{\s*\#.*$}{};
     $self->key($primary_key);
 
@@ -175,17 +176,13 @@ hard) to grab the biggest ammount of information it can from the text presented
 and place it in a Parse Tree (that can be passed to other objects from the
 I<RPSL> namespace for validation and more RFC2622 related functionality).
 
-=head1 METHODS
+=head1 PUBLIC METHODS
 
-=head2 Public Interface 
-
-=over 4
-
-=item B<C<new()>>
+=head2 B<C<new()>>
 
 Constructor. Handles the accessor creation and returns a new L<RPSL::Parser> object.
 
-=item B<C<parse( [ $rpsl_source | IO::Handle | GLOB ] )>>
+=head2 B<C<parse( [ $rpsl_source | IO::Handle | GLOB ] )>>
 
 Parses B<one> RPSL object for each call, uses the parser internal fields to
 store the data gathered. This is the method you need to call to transform your
@@ -195,89 +192,81 @@ It accepts a list or a scalar containing the strings representing the RPSL
 source code you want to parse, and can read it directly from any L<IO::Handle>
 or C<GLOB> representing an open file handle.
 
-=back
+=head1 ACCESSOR METHODS
 
-=head2 Accessor Methods
-
-=over 4
-
-=item B<C<comment()>>
+=head2 B<C<comment()>>
 
 Stores an array reference containing all the inline comments found in the RPSL
 text.
 
-=item B<C<object>>
+=head2 B<C<object>>
 
 Stores a hash reference containing all the RPSL attributes found in the RPSL
 text.
 
-=item B<C<omit_key>>
+=head2 B<C<omit_key>>
 
 Stores an array reference containing all the position of the keys we must omit
 from the original RPSL text.
 
-=item B<C<order>>
+=head2 B<C<order>>
 
 Stores an array reference containing an ordered list of RPSL attribute names,
 to enable the RPSL to be rebuilt from the parsed data version.
 
-=item B<C<key>>
+=head2 B<C<key>>
 
 Stores the value found in the first RPSL attribute parsed. This is sometimes
 refered as the RPSL object key.
 
-=item B<C<text>>
+=head2 B<C<text>>
 
 Stores an scalar containing the RPSL text to be parsed.
 
-=item B<C<tokens>>
+=head2 B<C<tokens>>
 
 Stores an array reference containing an ordered list of tokens and token values
 produced by the tokenize method.
 
-=item B<C<type>>
+=head2 B<C<type>>
 
 Stores a string representing the name of the first RPSL attribute found in the
 RPSL text parsed. The RFC 2622 requires that the first attribute declares the
 "data type" of the RPSL object declared. 
 
-=back
+=head1 Private Interface 
 
-=head2 Private Interface 
-
-=over 4
-
-=item B<C<_read_text( @input )>>
+=head2 B<C<_read_text( @input )>>
 
 Checks if the first element from C<@input> is a L<IO::Handle> or a C<GLOB>, and
 reads from it. If the first element is not any type of file handle, assumes
 it's an array of scalars containing the text for the RPSL object to be parsed,
 C<join()> it all toghether and feed it to the parser.
 
-=item B<C<_tokenize()>>
+=head2 B<C<_tokenize()>>
 
 This method breaks down the RPSL source code read by C<read_text()> into
 tokens, and store them internally. For commodity, it returs a reference to the
 object itself, so you can chain up method calls.
 
-=item B<C<_cleanup_attribute( $value )>>
+=head2 B<C<_cleanup_attribute( $value )>>
 
 Returns a cleaned-up version of the attribute passed in: no trailling or
 leading whitespace or newlines.
 
-=item B<C<_store_attribute( $attribute_name, $attribute_value )>>
+=head2 B<C<_store_attribute( $attribute_name, $attribute_value )>>
 
 Auxiliary method. It clean up the value and store the attribute in the data
 structure being built, and does the necessary storage upkeep.
 
-=item B<C<_store_comment( $comment_position_index, $attribute_and_comment_text )>>
+=head2 B<C<_store_comment( $comment_position_index, $attribute_and_comment_text )>>
 
 This method extracts inline comments from the inline part of an object and
 store those comments into the parse tree being built. It returns the attribute
 passed in with the comments stripped, so it can be stored into the appropriated
 place afterwards.
 
-=item B<C<_build_parse_tree()>>
+=head2 B<C<_build_parse_tree()>>
 
 This method consumes the tokens produced by C<_tokenize()> and builds a data
 structure containing all the information needed to re-build the RPSL object
@@ -286,14 +275,12 @@ back.
 It returns a reference to the parser object itself, making easy to chain method
 calls again.
 
-=item B<C<_parse_tree()>>
+=head2 B<C<_parse_tree()>>
 
 This method assembles all the information gathered during the RPSL source code
 tokenization and parsing into a hash reference containing the following keys:
 
-=over 4
-
-=item B<data>
+=head2 B<data>
 
 Holds a hash reference whose keys are the RPSL attributes found, and the values
 are the string passed in as values to the respective attributes in the RPSL
@@ -301,32 +288,32 @@ text. Multi-valued attributes are represented by array references. As this
 parser doesn't enforces all the RPSL business rules, you must take care when
 fiddling with this structure, as any value could be an array reference.
 
-=item B<order>
+=head2 B<order>
 
 Holds an array reference containing the key names from the B<data> hash, in the
 order they where found in the RPSL text. This is stored here because the RFC
 2622 commands that the order of the attributes in a RPSL object is important.
 
-=item B<type>
+=head2 B<type>
 
 Holds a string containing the name of the first RPSL attribute found in the
 RPSL text. RFC 2622 commands that the first attribute must be the type of the
 object declared. Knowing the type of object can allow proper manipulation of
 the different RPSL object types by other RPSL namespace modules.
 
-=item B<key>
+=head2 B<key>
 
 Holds the value contained by the first attribute of an RPSL object. This is
 sometimes the "primary key" of a RPSL object, but not always. 
 
-=item B<comment>
+=head2 B<comment>
 
 Comment is a hash structure where the keys are index positions in the B<order>
 array, and values are the inline comments extracted during the parsing stage.
 Preserving inline comments is not a requirement from RFC 2622, just a nice
 thing to have.
 
-=item B<omit_key>
+=head2 B<omit_key>
 
 RFC 2622 allows some attribute names to contain multiple values. For every new
 value, a new line must be inserted into the RPSL object. For brevity, and to
@@ -340,19 +327,83 @@ generating RPSL text back from this parse tree. As RFC 2622 doesn't request
 that attributes omited by starting a line with whitespace or "+" must preserve
 this characteristic, this is only a nice-to-have feature.  =back
 
-=back
+=head1 EXAMPLES
 
-=back
+=head2 Example #1: retrieving information from the Whois Database
+
+Suppose you retrieve a RPSL Person object from the RIPE NCC WHOIS Database,
+like the one below. It's a simple query and I will not explain how you could do
+it here, because it's a bit out of scope for this module. Anyway, you have the
+following text as a result:
+
+	person:       I. M. A. Fool
+	address:      F.A.K.E Corporation
+	address:      226 Nowhere st
+	address:      10DD10 Nevercity
+		      Neverland
+	phone:        +99-99-999-9999
+	fax-no:       +99-99-999-9999
+	e-mail:       xxx@somewhere.com
+	nic-hdl:      XXX007-RIPE # Look, ma, I'm 007! ;)
+	mnt-by:       NICE-GUY-MNT
+	changed:      xxx@somewhere.com 20001016
+	source:       RIPE
+
+Let's assume you need to send an email (for example, to report routing
+problems) to Mr Fool. It means that you need to retrieve the I<e-mail> field
+value from this RPSL object.
+
+Let's assume you have the previous text in the C<$text> variable. In order to
+parse the contents of the text into a nice Perl data structure, all you need to
+do is instanciate a parser, with
+
+        use RPSL::Parser;
+	my $parser = new RPSL::Parser;
+
+And then pass it the contents of the C<$text> variable, and collect the
+resulting data structure back:
+
+        my $data_structure = $parser->parse( $text );
+
+It will give you something that will look more or less like this (dumped by
+L<Data::Dumper>):
+
+	$data_strucutre = {
+	    'omit_key' => [ 4 ],
+	    'comment'  => { 8 => q{Look, ma, I'm 007! ;)} },
+	    'order'    => [
+		'person', 'address', 'address', 'address', 'address', 'phone',
+		'fax-no', 'e-mail',  'nic-hdl', 'mnt-by',  'changed', 'source'
+	    ],
+	    'type' => 'person',
+	    'data' => {
+		'source'  => 'RIPE',
+		'mnt-by'  => 'NICE-GUY-MNT',
+		'phone'   => '+99-99-999-9999',
+		'nic-hdl' => 'XXX007-RIPE',
+		'fax-no'  => '+99-99-999-9999',
+		'e-mail'  => 'xxx@somewhere.com',
+		'changed' => 'xxx@somewhere.com 20001016',
+		'person'  => 'I. M. A. Fool',
+		'address' => [
+		    'F.A.K.E Corporation',
+		    '226 Nowhere st',
+		    '10DD10 Nevercity',
+		    'Neverland'
+		]
+	    },
+	    'key' => 'I. M. A. Fool'
+	};
+
+In a near future, there will be other objects that will know how to interpret
+this as the specific RPSL object declared, and to write the corresponding RPSL
+representation of a given data structure, simmilar to this one.
 
 =head1 SEE ALSO
 
 RFC2622 L<http://www.ietf.org/rfc/rfc2622.txt>, for the full RPSL specification.
 
 L<Object::Accessor>, for the accessor implementation used in this module.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
 
 =head1 AUTHOR
 
