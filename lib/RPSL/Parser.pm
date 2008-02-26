@@ -3,8 +3,7 @@ use strict;
 use warnings;
 use base qw( Object::Accessor );
 
-
-our $VERSION = do { q$Revision: 19 $ =~ m{(\d+)}; return $1 / 100 };
+our $VERSION = do { q$Revision: 28 $ =~ m{(\d+)}; return $1 / 100 };
 
 BEGIN { $Object::Accessor::FATAL = 1; }
 
@@ -143,12 +142,14 @@ sub _build_parse_tree {
 sub _parse_tree {
     my $self = shift;
     return {
-        data     => $self->object,
-        order    => $self->order,
-        type     => $self->type,
-        key      => $self->key,
-        comment  => $self->comment,
-        omit_key => $self->omit_key,
+        data => $self->object,
+        type => $self->type,
+        key  => $self->key,
+        meta => {
+            order    => $self->order,
+            comment  => $self->comment,
+            omit_key => $self->omit_key,
+        },
     };
 }
 

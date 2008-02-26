@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                RPSL-Parser
-version:             0.19
+version:             0.28
 abstract:            Router Policy Specification Language (RFC2622) Parser
 license:             ~
 author:              

@@ -21,12 +21,15 @@ source:       RIPE
 RPSL
 
 my $expected_structure = {
-    'omit_key' => [ 4 ],
-    'comment'  => { 8 => q{Look, ma, I'm 007! ;)} },
-    'order'    => [
-        'person', 'address', 'address', 'address', 'address', 'phone',
-        'fax-no', 'e-mail',  'nic-hdl', 'mnt-by',  'changed', 'source'
-    ],
+    meta => {
+        'omit_key' => [4],
+        'comment'  => { 8 => q{Look, ma, I'm 007! ;)} },
+        'order'    => [
+            'person',  'address', 'address', 'address',
+            'address', 'phone',   'fax-no',  'e-mail',
+            'nic-hdl', 'mnt-by',  'changed', 'source'
+        ],
+    },
     'type' => 'person',
     'data' => {
         'source'  => 'RIPE',
