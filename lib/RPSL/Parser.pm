@@ -2,7 +2,7 @@ package RPSL::Parser;
 use strict;
 use warnings;
 
-our $VERSION = do { q$Revision: 29 $ =~ m{(\d+)}; return $1 / 100 };
+our $VERSION = do { q$Revision: 32 $ =~ m{(\d+)}; return $1 / 100 };
 
 # Public Interface Methods
 
@@ -473,8 +473,6 @@ representation of a given data structure, simmilar to this one.
 =head1 SEE ALSO
 
 RFC2622 L<http://www.ietf.org/rfc/rfc2622.txt>, for the full RPSL specification.
-
-L<Object::Accessor>, for the accessor implementation used in this module.
 
 =head1 AUTHOR
 
