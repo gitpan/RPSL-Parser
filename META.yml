@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                RPSL-Parser
-version:             0.28
+version:             0.29
 abstract:            Router Policy Specification Language (RFC2622) Parser
 license:             ~
 author:              
@@ -8,7 +8,6 @@ author:
 generated_by:        ExtUtils::MakeMaker version 6.42
 distribution_type:   module
 requires:     
-    Object::Accessor:              
 meta-spec:
     url:     http://module-build.sourceforge.net/META-spec-v1.3.html
     version: 1.3

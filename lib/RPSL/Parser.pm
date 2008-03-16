@@ -1,33 +1,103 @@
 package RPSL::Parser;
 use strict;
 use warnings;
-use base qw( Object::Accessor );
 
-our $VERSION = do { q$Revision: 28 $ =~ m{(\d+)}; return $1 / 100 };
+our $VERSION = do { q$Revision: 29 $ =~ m{(\d+)}; return $1 / 100 };
 
-BEGIN { $Object::Accessor::FATAL = 1; }
+# Public Interface Methods
 
+# Constructor
 sub new {
     my $class = shift;
-
-    # I need to initialize some variables before use
-    my %accessors = (
-        comment  => {},
-        object   => {},
-        omit_key => [],
-        order    => [],
-    );
-    my $self = $class->SUPER::new;
-    $self->mk_accessors( qw(key text tokens type), keys %accessors );
-    $self->$_( $accessors{$_} ) for keys %accessors;
+    my $self  = bless {
+        __META => {
+	    text     => undef, 
+            type     => undef,
+            tokens   => undef,
+            key      => undef,
+            comment  => {},
+            object   => {},
+            omit_key => undef,
+            order    => undef
+        }
+    }, $class;
     return $self;
 }
 
+# service method
 sub parse {
     my $self = shift;
     return $self->_read_text(@_)->_tokenize->_build_parse_tree->_parse_tree;
 }
 
+# Private Interface Methods
+
+# Accessor methods
+sub text {
+    return ref( $_[0] )
+        ? scalar @_ == 2
+            ? $_[0]->{__META}{text} = $_[1]
+            : $_[0]->{__META}{text}
+        : undef;
+}
+
+sub type {
+    return ref( $_[0] )
+        ? scalar @_ == 2
+            ? $_[0]->{__META}{type} = $_[1]
+            : $_[0]->{__META}{type}
+        : undef;
+}
+
+sub tokens {
+    return ref( $_[0] )
+        ? scalar @_ == 2
+            ? $_[0]->{__META}{tokens} = $_[1]
+            : $_[0]->{__META}{tokens}
+        : undef;
+}
+
+sub key {
+    return ref( $_[0] )
+        ? scalar @_ == 2
+            ? $_[0]->{__META}{key} = $_[1]
+            : $_[0]->{__META}{key}
+        : undef;
+}
+
+sub comment {
+    return ref( $_[0] )
+        ? scalar @_ == 2
+            ? $_[0]->{__META}{comment} = $_[1]
+            : $_[0]->{__META}{comment}
+        : undef;
+}
+
+sub object {
+    return ref( $_[0] )
+        ? scalar @_ == 2
+            ? $_[0]->{__META}{object} = $_[1]
+            : $_[0]->{__META}{object}
+        : undef;
+}
+
+sub omit_key {
+    return ref( $_[0] )
+        ? scalar @_ == 2
+            ? $_[0]->{__META}{omit_key} = $_[1]
+            : $_[0]->{__META}{omit_key}
+        : undef;
+}
+
+sub order {
+    return ref( $_[0] )
+        ? scalar @_ == 2
+            ? $_[0]->{__META}{order} = $_[1]
+            : $_[0]->{__META}{order}
+        : undef;
+}
+
+# Other private methods
 sub _read_text {
     my ( $self, @input ) = @_;
     my $data;
