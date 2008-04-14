@@ -2,7 +2,7 @@ package RPSL::Parser;
 use strict;
 use warnings;
 
-our $VERSION = do { q$Revision: 32 $ =~ m{(\d+)}; return $1 / 100 };
+our $VERSION = do { q$Revision: 38 $ =~ m{(\d+)}; return $1 / 100 };
 
 # Public Interface Methods
 
@@ -11,7 +11,7 @@ sub new {
     my $class = shift;
     my $self  = bless {
         __META => {
-	    text     => undef, 
+            text     => undef,
             type     => undef,
             tokens   => undef,
             key      => undef,
@@ -27,74 +27,28 @@ sub new {
 # service method
 sub parse {
     my $self = shift;
+    unless ( UNIVERSAL::isa( $self, q{RPSL::Parser} ) ) {
+        $self = RPSL::Parser->new;
+    }
     return $self->_read_text(@_)->_tokenize->_build_parse_tree->_parse_tree;
 }
 
 # Private Interface Methods
 
-# Accessor methods
-sub text {
-    return ref( $_[0] )
-        ? scalar @_ == 2
-            ? $_[0]->{__META}{text} = $_[1]
-            : $_[0]->{__META}{text}
-        : undef;
-}
-
-sub type {
-    return ref( $_[0] )
-        ? scalar @_ == 2
-            ? $_[0]->{__META}{type} = $_[1]
-            : $_[0]->{__META}{type}
-        : undef;
-}
-
-sub tokens {
-    return ref( $_[0] )
-        ? scalar @_ == 2
-            ? $_[0]->{__META}{tokens} = $_[1]
-            : $_[0]->{__META}{tokens}
-        : undef;
-}
-
-sub key {
-    return ref( $_[0] )
-        ? scalar @_ == 2
-            ? $_[0]->{__META}{key} = $_[1]
-            : $_[0]->{__META}{key}
-        : undef;
-}
-
-sub comment {
-    return ref( $_[0] )
-        ? scalar @_ == 2
-            ? $_[0]->{__META}{comment} = $_[1]
-            : $_[0]->{__META}{comment}
-        : undef;
-}
-
-sub object {
-    return ref( $_[0] )
-        ? scalar @_ == 2
-            ? $_[0]->{__META}{object} = $_[1]
-            : $_[0]->{__META}{object}
-        : undef;
-}
-
-sub omit_key {
-    return ref( $_[0] )
-        ? scalar @_ == 2
-            ? $_[0]->{__META}{omit_key} = $_[1]
-            : $_[0]->{__META}{omit_key}
-        : undef;
-}
-
-sub order {
-    return ref( $_[0] )
-        ? scalar @_ == 2
-            ? $_[0]->{__META}{order} = $_[1]
-            : $_[0]->{__META}{order}
-        : undef;
+# Generated Accessor methods
+BEGIN {
+    no strict 'refs';
+    my @accessors = qw{ text type tokens key comment object omit_key order };
+    foreach my $accessor (@accessors) {
+        *{ __PACKAGE__ . '::' . $accessor } = sub {
+            return
+                  ref( $_[0] )
+                ? scalar @_ == 2
+                    ? $_[0]->{__META}{$accessor} = $_[1]
+                    : $_[0]->{__META}{$accessor}
+                : undef;
+        };
+    }
 }
 
 # Other private methods
@@ -128,14 +82,14 @@ sub _tokenize {
     study $text;
     my @tokens = $text =~ m{
         ^(?:
-	    # Look for an attribute name ...
+            # Look for an attribute name ...
             ( [a-z0-9][a-z0-9_-]+[a-z0-9] ):
-	    # ... followed by zero or more horizontal spaces ...
+            # ... followed by zero or more horizontal spaces ...
             [\t ]*
-	    # ... followed by a value ...
+            # ... followed by a value ...
             ( .*?
-		# ... and all valid continuation lines.
-	        (?: \n [\s+] .* ? )*
+                # ... and all valid continuation lines.
+                (?: \n [\s+] .* ? )*
             )
         )$
     }mixg;
@@ -232,11 +186,19 @@ RPSL::Parser - Router Policy Specification Language (RFC2622) Parser
 
 =head1 SYNOPSIS
 
-	use RPSL::Parser;
-	# Create a parser
-	my $parser = new RPSL::Parser;
-	# Use it
-	my $data_structure = $parser->parse($data);
+	# The new interface doesn't requires the creation of
+	# a parser object anymore:
+        use RPSL::Parser;
+	my $data_structure = RPSL::Parser->parse( $data );
+
+	###########
+
+	# Alternativelly, use the old and deprecated interface:
+        use RPSL::Parser;
+        # Create a parser
+        my $parser = new RPSL::Parser;
+        # Use it
+        my $data_structure = $parser->parse($data);
 
 =head1 DESCRIPTION
 
@@ -249,9 +211,13 @@ I<RPSL> namespace for validation and more RFC2622 related functionality).
 
 =head1 PUBLIC METHODS
 
-=head2 B<C<new()>>
+=head2 B<C<new()>> B<deprecated>
 
 Constructor. Handles the accessor creation and returns a new L<RPSL::Parser> object.
+
+This method is deprecated, under request of some users. The RPSL::Parser
+interface will change, and there will be no need to create a "parser" object
+anymore.
 
 =head2 B<C<parse( [ $rpsl_source | IO::Handle | GLOB ] )>>
 
@@ -262,6 +228,11 @@ RPSL text into a Perl data structure.
 It accepts a list or a scalar containing the strings representing the RPSL
 source code you want to parse, and can read it directly from any L<IO::Handle>
 or C<GLOB> representing an open file handle.
+
+This is a mixture between a class and a object method at this moment, due to
+the deprecation of the C<new()> method. It can detect whenever it was called
+with a class as the first parameter, and will try to instantiate and use that
+class as the parser implementation.
 
 =head1 ACCESSOR METHODS
 
@@ -303,9 +274,9 @@ produced by the tokenize method.
 
 Stores a string representing the name of the first RPSL attribute found in the
 RPSL text parsed. The RFC 2622 requires that the first attribute declares the
-"data type" of the RPSL object declared. 
+"data type" of the RPSL object declared.
 
-=head1 Private Interface 
+=head1 Private Interface
 
 =head2 B<C<_read_text( @input )>>
 
@@ -375,7 +346,7 @@ the different RPSL object types by other RPSL namespace modules.
 =head2 B<key>
 
 Holds the value contained by the first attribute of an RPSL object. This is
-sometimes the "primary key" of a RPSL object, but not always. 
+sometimes the "primary key" of a RPSL object, but not always.
 
 =head2 B<comment>
 
@@ -407,18 +378,18 @@ like the one below. It's a simple query and I will not explain how you could do
 it here, because it's a bit out of scope for this module. Anyway, you have the
 following text as a result:
 
-	person:       I. M. A. Fool
-	address:      F.A.K.E Corporation
-	address:      226 Nowhere st
-	address:      10DD10 Nevercity
-		      Neverland
-	phone:        +99-99-999-9999
-	fax-no:       +99-99-999-9999
-	e-mail:       xxx@somewhere.com
-	nic-hdl:      XXX007-RIPE # Look, ma, I'm 007! ;)
-	mnt-by:       NICE-GUY-MNT
-	changed:      xxx@somewhere.com 20001016
-	source:       RIPE
+        person:       I. M. A. Fool
+        address:      F.A.K.E Corporation
+        address:      226 Nowhere st
+        address:      10DD10 Nevercity
+                      Neverland
+        phone:        +99-99-999-9999
+        fax-no:       +99-99-999-9999
+        e-mail:       xxx@somewhere.com
+        nic-hdl:      XXX007-RIPE # Look, ma, I'm 007! ;)
+        mnt-by:       NICE-GUY-MNT
+        changed:      xxx@somewhere.com 20001016
+        source:       RIPE
 
 Let's assume you need to send an email (for example, to report routing
 problems) to Mr Fool. It means that you need to retrieve the I<e-mail> field
@@ -429,7 +400,7 @@ parse the contents of the text into a nice Perl data structure, all you need to
 do is instanciate a parser, with
 
         use RPSL::Parser;
-	my $parser = new RPSL::Parser;
+        my $parser = new RPSL::Parser;
 
 And then pass it the contents of the C<$text> variable, and collect the
 resulting data structure back:
@@ -439,32 +410,32 @@ resulting data structure back:
 It will give you something that will look more or less like this (dumped by
 L<Data::Dumper>):
 
-	$data_strucutre = {
-	    'omit_key' => [ 4 ],
-	    'comment'  => { 8 => q{Look, ma, I'm 007! ;)} },
-	    'order'    => [
-		'person', 'address', 'address', 'address', 'address', 'phone',
-		'fax-no', 'e-mail',  'nic-hdl', 'mnt-by',  'changed', 'source'
-	    ],
-	    'type' => 'person',
-	    'data' => {
-		'source'  => 'RIPE',
-		'mnt-by'  => 'NICE-GUY-MNT',
-		'phone'   => '+99-99-999-9999',
-		'nic-hdl' => 'XXX007-RIPE',
-		'fax-no'  => '+99-99-999-9999',
-		'e-mail'  => 'xxx@somewhere.com',
-		'changed' => 'xxx@somewhere.com 20001016',
-		'person'  => 'I. M. A. Fool',
-		'address' => [
-		    'F.A.K.E Corporation',
-		    '226 Nowhere st',
-		    '10DD10 Nevercity',
-		    'Neverland'
-		]
-	    },
-	    'key' => 'I. M. A. Fool'
-	};
+        $data_strucutre = {
+            'omit_key' => [ 4 ],
+            'comment'  => { 8 => q{Look, ma, I'm 007! ;)} },
+            'order'    => [
+                'person', 'address', 'address', 'address', 'address', 'phone',
+                'fax-no', 'e-mail',  'nic-hdl', 'mnt-by',  'changed', 'source'
+            ],
+            'type' => 'person',
+            'data' => {
+                'source'  => 'RIPE',
+                'mnt-by'  => 'NICE-GUY-MNT',
+                'phone'   => '+99-99-999-9999',
+                'nic-hdl' => 'XXX007-RIPE',
+                'fax-no'  => '+99-99-999-9999',
+                'e-mail'  => 'xxx@somewhere.com',
+                'changed' => 'xxx@somewhere.com 20001016',
+                'person'  => 'I. M. A. Fool',
+                'address' => [
+                    'F.A.K.E Corporation',
+                    '226 Nowhere st',
+                    '10DD10 Nevercity',
+                    'Neverland'
+                ]
+            },
+            'key' => 'I. M. A. Fool'
+        };
 
 In a near future, there will be other objects that will know how to interpret
 this as the specific RPSL object declared, and to write the corresponding RPSL

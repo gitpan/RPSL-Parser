@@ -1,7 +1,9 @@
+#!/usr/bin/perl
 use Test::More tests => 1;
 use strict;
 use warnings;
 use RPSL::Parser;
+
 
 my $parser = new RPSL::Parser;
 
@@ -54,3 +56,4 @@ my $data = $parser->parse($object);
 
 is_deeply( $data, $expected_structure );
 
+# vim: expandtab ts=4

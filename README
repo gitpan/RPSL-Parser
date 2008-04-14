@@ -2,6 +2,14 @@ NAME
     RPSL::Parser - Router Policy Specification Language (RFC2622) Parser
 
 SYNOPSIS
+            # The new interface doesn't requires the creation of
+            # a parser object anymore:
+            use RPSL::Parser;
+            my $data_structure = RPSL::Parser->parse( $data );
+
+            ###########
+
+            # Alternativelly, use the old and deprecated interface:
             use RPSL::Parser;
             # Create a parser
             my $parser = new RPSL::Parser;
@@ -18,9 +26,13 @@ DESCRIPTION
     related functionality).
 
 PUBLIC METHODS
-  "new()"
+  "new()" deprecated
     Constructor. Handles the accessor creation and returns a new
     RPSL::Parser object.
+
+    This method is deprecated, under request of some users. The RPSL::Parser
+    interface will change, and there will be no need to create a "parser"
+    object anymore.
 
   "parse( [ $rpsl_source | IO::Handle | GLOB ] )"
     Parses one RPSL object for each call, uses the parser internal fields to
@@ -30,6 +42,11 @@ PUBLIC METHODS
     It accepts a list or a scalar containing the strings representing the
     RPSL source code you want to parse, and can read it directly from any
     IO::Handle or "GLOB" representing an open file handle.
+
+    This is a mixture between a class and a object method at this moment,
+    due to the deprecation of the "new()" method. It can detect whenever it
+    was called with a class as the first parameter, and will try to
+    instantiate and use that class as the parser implementation.
 
 ACCESSOR METHODS
   "comment()"
