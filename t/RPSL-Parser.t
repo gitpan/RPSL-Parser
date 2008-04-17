@@ -7,6 +7,8 @@ my $class = 'RPSL::Parser';
 
 can_ok $class, qw( new parse );
 
+fail qw{ Failing test };
+
 {   my $parser = new RPSL::Parser;
     isa_ok $parser, $class;
 }

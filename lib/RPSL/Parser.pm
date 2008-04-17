@@ -2,7 +2,7 @@ package RPSL::Parser;
 use strict;
 use warnings;
 
-our $VERSION = do { q$Revision: 38 $ =~ m{(\d+)}; return $1 / 100 };
+our $VERSION = do { q$Revision: 39 $ =~ m{(\d+)}; $1 / 100 };
 
 # Public Interface Methods
 
