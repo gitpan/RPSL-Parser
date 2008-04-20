@@ -8,7 +8,7 @@ __PACKAGE__->mk_accessors(
       object omit_key order )
 );
 
-our $VERSION = 0.039_001;
+our $VERSION = "0.039_001";
 
 # Public Interface Methods
 
