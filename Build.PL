@@ -10,7 +10,7 @@ my $build = Module::Build->new
   (
    module_name => 'RPSL::Parser',
    dist_version_from => 'lib/RPSL/Parser.pm',
-   requires => {},
+   requires => { 'Class::Accessor' => 0.31 },
    license => 'perl',
    create_readme => 1,
    create_makefile_pl => 'traditional',

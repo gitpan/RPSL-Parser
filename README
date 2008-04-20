@@ -2,19 +2,19 @@ NAME
     RPSL::Parser - Router Policy Specification Language (RFC2622) Parser
 
 SYNOPSIS
-            # The new interface doesn't requires the creation of
-            # a parser object anymore:
-            use RPSL::Parser;
-            my $data_structure = RPSL::Parser->parse( $data );
+        # The new interface doesn't requires the creation of
+        # a parser object anymore:
+        use RPSL::Parser;
+        my $data_structure = RPSL::Parser->parse( $data );
 
-            ###########
+        ###########
 
-            # Alternativelly, use the old and deprecated interface:
-            use RPSL::Parser;
-            # Create a parser
-            my $parser = new RPSL::Parser;
-            # Use it
-            my $data_structure = $parser->parse($data);
+        # Alternativelly, use the old and deprecated interface:
+        use RPSL::Parser;
+        # Create a parser
+        my $parser = new RPSL::Parser;
+        # Use it
+        my $data_structure = $parser->parse($data);
 
 DESCRIPTION
     This is a rather simplistic lexer and tokenizer for the RPSL language.
@@ -173,18 +173,18 @@ EXAMPLES
     how you could do it here, because it's a bit out of scope for this
     module. Anyway, you have the following text as a result:
 
-            person:       I. M. A. Fool
-            address:      F.A.K.E Corporation
-            address:      226 Nowhere st
-            address:      10DD10 Nevercity
-                          Neverland
-            phone:        +99-99-999-9999
-            fax-no:       +99-99-999-9999
-            e-mail:       xxx@somewhere.com
-            nic-hdl:      XXX007-RIPE # Look, ma, I'm 007! ;)
-            mnt-by:       NICE-GUY-MNT
-            changed:      xxx@somewhere.com 20001016
-            source:       RIPE
+        person:       I. M. A. Fool
+        address:      F.A.K.E Corporation
+        address:      226 Nowhere st
+        address:      10DD10 Nevercity
+                      Neverland
+        phone:        +99-99-999-9999
+        fax-no:       +99-99-999-9999
+        e-mail:       xxx@somewhere.com
+        nic-hdl:      XXX007-RIPE # Look, ma, I'm 007! ;)
+        mnt-by:       NICE-GUY-MNT
+        changed:      xxx@somewhere.com 20001016
+        source:       RIPE
 
     Let's assume you need to send an email (for example, to report routing
     problems) to Mr Fool. It means that you need to retrieve the *e-mail*
@@ -194,23 +194,25 @@ EXAMPLES
     to parse the contents of the text into a nice Perl data structure, all
     you need to do is instanciate a parser, with
 
-            use RPSL::Parser;
-            my $parser = new RPSL::Parser;
+        use RPSL::Parser;
+        my $parser = new RPSL::Parser;
 
     And then pass it the contents of the $text variable, and collect the
     resulting data structure back:
 
-            my $data_structure = $parser->parse( $text );
+        my $data_structure = $parser->parse( $text );
 
     It will give you something that will look more or less like this (dumped
     by Data::Dumper):
 
-            $data_strucutre = {
-                'omit_key' => [ 4 ],
+        $data_strucutre = {
+            __META => {
+                'omit_key' => [4],
                 'comment'  => { 8 => q{Look, ma, I'm 007! ;)} },
                 'order'    => [
-                    'person', 'address', 'address', 'address', 'address', 'phone',
-                    'fax-no', 'e-mail',  'nic-hdl', 'mnt-by',  'changed', 'source'
+                    'person',  'address', 'address', 'address',
+                    'address', 'phone',   'fax-no',  'e-mail',
+                    'nic-hdl', 'mnt-by',  'changed', 'source'
                 ],
                 'type' => 'person',
                 'data' => {
@@ -230,7 +232,8 @@ EXAMPLES
                     ]
                 },
                 'key' => 'I. M. A. Fool'
-            };
+            },
+        };
 
     In a near future, there will be other objects that will know how to
     interpret this as the specific RPSL object declared, and to write the

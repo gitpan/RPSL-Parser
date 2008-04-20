@@ -7,6 +7,8 @@ WriteMakefile
           'NAME' => 'RPSL::Parser',
           'EXE_FILES' => [],
           'VERSION_FROM' => 'lib/RPSL/Parser.pm',
-          'PREREQ_PM' => {}
+          'PREREQ_PM' => {
+                           'Class::Accessor' => '0.31'
+                         }
         )
 ;

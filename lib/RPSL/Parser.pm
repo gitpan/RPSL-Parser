@@ -1,8 +1,14 @@
 package RPSL::Parser;
+require 5.006_001;
 use strict;
 use warnings;
+use base qw( Class::Accessor );
+__PACKAGE__->mk_accessors(
+    qw( text type tokens key comment
+      object omit_key order )
+);
 
-our $VERSION = do { q$Revision: 39 $ =~ m{(\d+)}; $1 / 100 };
+our $VERSION = 0.039_001;
 
 # Public Interface Methods
 
@@ -11,14 +17,8 @@ sub new {
     my $class = shift;
     my $self  = bless {
         __META => {
-            text     => undef,
-            type     => undef,
-            tokens   => undef,
-            key      => undef,
-            comment  => {},
-            object   => {},
-            omit_key => undef,
-            order    => undef
+            comment => {},
+            object  => {},
         }
     }, $class;
     return $self;
@@ -35,20 +35,18 @@ sub parse {
 
 # Private Interface Methods
 
-# Generated Accessor methods
-BEGIN {
-    no strict 'refs';
-    my @accessors = qw{ text type tokens key comment object omit_key order };
-    foreach my $accessor (@accessors) {
-        *{ __PACKAGE__ . '::' . $accessor } = sub {
-            return
-                  ref( $_[0] )
-                ? scalar @_ == 2
-                    ? $_[0]->{__META}{$accessor} = $_[1]
-                    : $_[0]->{__META}{$accessor}
-                : undef;
-        };
-    }
+# Overriding Class::Accessor::get
+sub get {
+    my ( $self, @keys ) = @_;
+    return wantarray
+      ? @{ $self->{__META} }{@keys}
+      : ${ $self->{__META} }{ $keys[0] };
+}
+
+# Overriding Class::Accessor::set
+sub set {
+    my ( $self, $key, $value ) = @_;
+    return $self->{__META}{$key} = $value;
 }
 
 # Other private methods
@@ -155,7 +153,7 @@ sub _build_parse_tree {
     # Stores the object primary key value
     my $primary_key = $self->object->{ $order[0] };
     $primary_key = $primary_key->[0]
-        if UNIVERSAL::isa( $primary_key, 'ARRAY' );
+      if UNIVERSAL::isa( $primary_key, 'ARRAY' );
     $primary_key =~ s{\s*\#.*$}{};
     $self->key($primary_key);
 
@@ -186,19 +184,19 @@ RPSL::Parser - Router Policy Specification Language (RFC2622) Parser
 
 =head1 SYNOPSIS
 
-	# The new interface doesn't requires the creation of
-	# a parser object anymore:
-        use RPSL::Parser;
-	my $data_structure = RPSL::Parser->parse( $data );
+    # The new interface doesn't requires the creation of
+    # a parser object anymore:
+    use RPSL::Parser;
+    my $data_structure = RPSL::Parser->parse( $data );
 
-	###########
+    ###########
 
-	# Alternativelly, use the old and deprecated interface:
-        use RPSL::Parser;
-        # Create a parser
-        my $parser = new RPSL::Parser;
-        # Use it
-        my $data_structure = $parser->parse($data);
+    # Alternativelly, use the old and deprecated interface:
+    use RPSL::Parser;
+    # Create a parser
+    my $parser = new RPSL::Parser;
+    # Use it
+    my $data_structure = $parser->parse($data);
 
 =head1 DESCRIPTION
 
@@ -378,18 +376,18 @@ like the one below. It's a simple query and I will not explain how you could do
 it here, because it's a bit out of scope for this module. Anyway, you have the
 following text as a result:
 
-        person:       I. M. A. Fool
-        address:      F.A.K.E Corporation
-        address:      226 Nowhere st
-        address:      10DD10 Nevercity
-                      Neverland
-        phone:        +99-99-999-9999
-        fax-no:       +99-99-999-9999
-        e-mail:       xxx@somewhere.com
-        nic-hdl:      XXX007-RIPE # Look, ma, I'm 007! ;)
-        mnt-by:       NICE-GUY-MNT
-        changed:      xxx@somewhere.com 20001016
-        source:       RIPE
+    person:       I. M. A. Fool
+    address:      F.A.K.E Corporation
+    address:      226 Nowhere st
+    address:      10DD10 Nevercity
+                  Neverland
+    phone:        +99-99-999-9999
+    fax-no:       +99-99-999-9999
+    e-mail:       xxx@somewhere.com
+    nic-hdl:      XXX007-RIPE # Look, ma, I'm 007! ;)
+    mnt-by:       NICE-GUY-MNT
+    changed:      xxx@somewhere.com 20001016
+    source:       RIPE
 
 Let's assume you need to send an email (for example, to report routing
 problems) to Mr Fool. It means that you need to retrieve the I<e-mail> field
@@ -399,23 +397,25 @@ Let's assume you have the previous text in the C<$text> variable. In order to
 parse the contents of the text into a nice Perl data structure, all you need to
 do is instanciate a parser, with
 
-        use RPSL::Parser;
-        my $parser = new RPSL::Parser;
+    use RPSL::Parser;
+    my $parser = new RPSL::Parser;
 
 And then pass it the contents of the C<$text> variable, and collect the
 resulting data structure back:
 
-        my $data_structure = $parser->parse( $text );
+    my $data_structure = $parser->parse( $text );
 
 It will give you something that will look more or less like this (dumped by
 L<Data::Dumper>):
 
-        $data_strucutre = {
-            'omit_key' => [ 4 ],
+    $data_strucutre = {
+        __META => {
+            'omit_key' => [4],
             'comment'  => { 8 => q{Look, ma, I'm 007! ;)} },
             'order'    => [
-                'person', 'address', 'address', 'address', 'address', 'phone',
-                'fax-no', 'e-mail',  'nic-hdl', 'mnt-by',  'changed', 'source'
+                'person',  'address', 'address', 'address',
+                'address', 'phone',   'fax-no',  'e-mail',
+                'nic-hdl', 'mnt-by',  'changed', 'source'
             ],
             'type' => 'person',
             'data' => {
@@ -435,7 +435,8 @@ L<Data::Dumper>):
                 ]
             },
             'key' => 'I. M. A. Fool'
-        };
+        },
+    };
 
 In a near future, there will be other objects that will know how to interpret
 this as the specific RPSL object declared, and to write the corresponding RPSL

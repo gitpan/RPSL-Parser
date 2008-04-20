@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+require 5.006_001;
 use Test::More tests => 1;
 use strict;
 use warnings;
@@ -55,5 +56,3 @@ my $expected_structure = {
 my $data = $parser->parse($object);
 
 is_deeply( $data, $expected_structure );
-
-# vim: expandtab ts=4
