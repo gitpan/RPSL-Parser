@@ -8,7 +8,7 @@ __PACKAGE__->mk_accessors(
       object omit_key order )
 );
 
-our $VERSION = "0.039_001";
+our $VERSION = "0.04000";
 
 # Public Interface Methods
 
@@ -26,7 +26,8 @@ sub new {
 
 # service method
 sub parse {
-    my $self = shift;
+    my $self_or_class = shift;
+    my $self = ref $self_or_class ? $self_or_class : $self_or_class->new();
     unless ( UNIVERSAL::isa( $self, q{RPSL::Parser} ) ) {
         $self = RPSL::Parser->new;
     }
